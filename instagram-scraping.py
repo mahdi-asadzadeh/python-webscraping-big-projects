@@ -78,17 +78,17 @@ class MetaSingleton(type):
 
 
 class DataBaseConnector(metaclass=MetaSingleton):
-    def __init__(self, data_base_file_name):
+    def __init__(self, data_base_file_name: str):
         self.db = dataset.connect(f'sqlite:///{data_base_file_name}.db')
 
 
 class DataBaseController:
 
-    def __init__(self, data_base_file_name):
+    def __init__(self, data_base_file_name: str):
         self.db = DataBaseConnector(data_base_file_name).db
 
     def processor(self, *args, **kwargs):
-        self.db['mahdi'].insert(kwargs)
+        self.db[args].insert(kwargs)
  
 
 class Scraping(ABC):
