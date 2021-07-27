@@ -47,19 +47,21 @@ class InstagramScrapingManager:
         return login
 
     def login_check(self):
-        cookie = None
+
         if os.path.getsize('cookies.txt') == 0:
             login = self.login()
             login_json = json.loads(login.text)
             cookies = login.cookies
             cookie_jar = cookies.get_dict()
-            cookie = cookie_jar['csrftoken']
+            cookie_json = json.dumps(cookie_jar) 
             file_cookies = open('cookies.txt', 'w')
-            file_cookies.write(cookie)
+            file_cookies.write(cookie_json)
             file_cookies.close()
+
         else:
             cookie_file = open('cookies.txt', 'r')
             cookie = cookie_file.read()
+            cookie_json = json.loads(cookie)
             self.session.cookies.update({'cookies':cookie})
 
 
@@ -88,7 +90,7 @@ class DataBaseController:
         self.db = DataBaseConnector(data_base_file_name).db
 
     def processor(self, *args, **kwargs):
-        self.db[args].insert(kwargs)
+        self.db['ghfghdcgfd'].insert(kwargs)
  
 
 class Scraping(ABC):
@@ -109,6 +111,7 @@ class ScrapingUser(Scraping):
     def scraping(self):
         hashtag_response = self.session.get(f'https://www.instagram.com/explore/tags/{self.tag_name}/?__a=1')
         json_hashtag_response = json.loads(hashtag_response.text)
+        print(json_hashtag_response)
         section = json_hashtag_response['data']['recent']['sections']
 
         for item_section in section:
@@ -132,8 +135,10 @@ def client_code(scraping_manager: InstagramScrapingManager):
 
 
 if __name__ == '__main__':
+
     USERNAME = ''
     PASSWORD = ''
+
     link = 'https://www.instagram.com/accounts/login/'
     login_url = 'https://www.instagram.com/accounts/login/ajax/'
 
