@@ -62,7 +62,7 @@ class InstagramScrapingManager:
             cookie_file = open('cookies.txt', 'r')
             cookie = cookie_file.read()
             cookie_json = json.loads(cookie)
-            self.session.cookies.update({'cookies':cookie})
+            self.session.cookies.update(cookie)
 
 
 # Subsystems
