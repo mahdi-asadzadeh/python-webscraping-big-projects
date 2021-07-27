@@ -24,7 +24,6 @@ class InstagramScrapingManager:
         self.scraping_user = ScrapingUser(kwargs['data_base_file_name'], kwargs['table_name'], self.session, kwargs['tag_name'])
 
     def start_scraping(self):
-        self.login_check()
         self.scraping_user.scraping()
         
     def login(self):
@@ -48,20 +47,22 @@ class InstagramScrapingManager:
 
     def login_check(self):
 
-        if os.path.getsize('cookies.txt') == 0:
+        if os.path.getsize('cookie.txt') == 0:
             login = self.login()
             login_json = json.loads(login.text)
+            print(login_json)
             cookies = login.cookies
             cookie_jar = cookies.get_dict()
             cookie_json = json.dumps(cookie_jar) 
-            file_cookies = open('cookies.txt', 'w')
+            file_cookies = open('cookie.txt', 'w')
             file_cookies.write(cookie_json)
             file_cookies.close()
 
         else:
-            cookie_file = open('cookies.txt', 'r')
+            print('**************************************')
+            cookie_file = open('cookie.txt', 'r')
             cookie = cookie_file.read()
-            cookie_json = json.loads(cookie)
+            cookie = json.loads(cookie)
             self.session.cookies.update(cookie)
 
 
@@ -109,9 +110,9 @@ class ScrapingUser(Scraping):
         self.db = DataBaseController(self.data_base_file_name)
 
     def scraping(self):
+        print(self.session.cookies.get_dict())
         hashtag_response = self.session.get(f'https://www.instagram.com/explore/tags/{self.tag_name}/?__a=1')
         json_hashtag_response = json.loads(hashtag_response.text)
-        print(json_hashtag_response)
         section = json_hashtag_response['data']['recent']['sections']
 
         for item_section in section:
