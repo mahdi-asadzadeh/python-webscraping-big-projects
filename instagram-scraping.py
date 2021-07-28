@@ -86,12 +86,11 @@ class DataBaseConnector(metaclass=MetaSingleton):
 
 
 class DataBaseController:
-
     def __init__(self, data_base_file_name: str):
         self.db = DataBaseConnector(data_base_file_name).db
 
     def processor(self, *args, **kwargs):
-        self.db['ghfghdcgfd'].insert(kwargs)
+        self.db[kwargs['table_name']].insert(kwargs)
  
 
 class Scraping(ABC):
@@ -109,10 +108,18 @@ class ScrapingUser(Scraping):
         self.table_name = table_name
         self.db = DataBaseController(self.data_base_file_name)
 
-    def scraping(self):
-        print(self.session.cookies.get_dict())
-        hashtag_response = self.session.get(f'https://www.instagram.com/explore/tags/{self.tag_name}/?__a=1')
+    def scraping(self, url = None):
+        if url:
+            scraping_url = url
+            print(scraping_url)
+            print('URL NEXT ......')
+        else:
+            scraping_url = f'https://www.instagram.com/explore/tags/{self.tag_name}/?__a=1'
+
+        hashtag_response = self.session.get(scraping_url)
         json_hashtag_response = json.loads(hashtag_response.text)
+        next_max_id = json_hashtag_response['data']['recent']['next_max_id']
+
         section = json_hashtag_response['data']['recent']['sections']
 
         for item_section in section:
@@ -123,9 +130,13 @@ class ScrapingUser(Scraping):
                 username = user['username']
                 full_name = user['full_name']
                 profile_pic_url = user['profile_pic_url']
-                self.db.processor(self.table_name, pk=pk, username=username, full_name=full_name, profile_pic_url=profile_pic_url)
+                self.db.processor(table_name=self.table_name, pk=pk, username=username, full_name=full_name, profile_pic_url=profile_pic_url)
 
+        while True:
+            self.scraping(url=f'https://www.instagram.com/explore/tags/{self.tag_name}/?__a=1&max_id={next_max_id}')
 
+     
+    
 # Client
 # ==========================================================================
 # ==========================================================================
@@ -150,5 +161,5 @@ if __name__ == '__main__':
         login_url=login_url,
         data_base_file_name='instagram',
         table_name = 'users',
-        tag_name = 'tehran',
+        tag_name = 'fastapi',
         ))
