@@ -21,10 +21,12 @@ class InstagramScrapingManager:
         self.login_url = kwargs['login_url']
         self.session = requests.Session()
         self.login_check()
-        self.scraping_user = ScrapingUser(kwargs['data_base_file_name'], kwargs['table_name'], self.session, kwargs['tag_name'])
+        # self.scraping_user = ScrapingUser(kwargs['data_base_file_name'], 'users', self.session, kwargs['tag_name'])
+        self.scraping_user_followers_followings = ScrapingUserFollowersAndFollowings(kwargs['data_base_file_name'], 'username_followers_followings', self.session, kwargs['username_followers_followings'])
 
     def start_scraping(self):
-        self.scraping_user.scraping()
+        # self.scraping_user.scraping()
+        self.scraping_user_followers_followings.scraping()
         
     def login(self):
         time = int(datetime.now().timestamp())
@@ -100,6 +102,21 @@ class Scraping(ABC):
         pass
 
 
+class ScrapingUserFollowersAndFollowings(Scraping):
+    def __init__(self, data_base_file_name: str, table_name: str, session: Session, username: str):
+        self.data_base_file_name = data_base_file_name
+        self.session = session
+        self.username = username
+        self.table_name = table_name
+        self.db = DataBaseController(self.data_base_file_name)
+
+    def scraping(self):
+        scraping_url = f'https://www.instagram.com/{self.username}/?__a=1'
+        hashtag_response = self.session.get(scraping_url)
+        json_hashtag_response = json.loads(hashtag_response.text)
+        print(json_hashtag_response.keys())
+      
+
 class ScrapingUser(Scraping):
     def __init__(self, data_base_file_name: str, table_name: str, session: Session, tag_name: str):
         self.data_base_file_name = data_base_file_name
@@ -136,7 +153,6 @@ class ScrapingUser(Scraping):
             self.scraping(url=f'https://www.instagram.com/explore/tags/{self.tag_name}/?__a=1&max_id={next_max_id}')
 
      
-    
 # Client
 # ==========================================================================
 # ==========================================================================
@@ -148,8 +164,8 @@ def client_code(scraping_manager: InstagramScrapingManager):
 
 if __name__ == '__main__':
 
-    USERNAME = ''
-    PASSWORD = ''
+    USERNAME = 'mahdi.asadzadeh.programing'
+    PASSWORD = 'mahdiasadzadeh1381!!!!'
 
     link = 'https://www.instagram.com/accounts/login/'
     login_url = 'https://www.instagram.com/accounts/login/ajax/'
@@ -160,6 +176,6 @@ if __name__ == '__main__':
         link=link, 
         login_url=login_url,
         data_base_file_name='instagram',
-        table_name = 'users',
-        tag_name = 'fastapi',
+        tag_name = '',
+        username_followers_followings = ''
         ))
